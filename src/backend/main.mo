@@ -170,8 +170,8 @@ actor {
 
   // Client CRUD operations - Admin only for modifications, users can read
   public shared ({ caller }) func addClient(client : Client) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can add clients");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add clients");
     };
     clients.add(client.id, client);
   };
@@ -194,23 +194,23 @@ actor {
   };
 
   public shared ({ caller }) func updateClient(client : Client) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update clients");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update clients");
     };
     clients.add(client.id, client);
   };
 
   public shared ({ caller }) func deleteClient(id : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete clients");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete clients");
     };
     clients.remove(id);
   };
 
   // Garden CRUD operations - Admin only for modifications, users can read
   public shared ({ caller }) func addGarden(garden : Garden) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can add gardens");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add gardens");
     };
     gardens.add(garden.id, garden);
   };
@@ -233,23 +233,23 @@ actor {
   };
 
   public shared ({ caller }) func updateGarden(garden : Garden) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update gardens");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update gardens");
     };
     gardens.add(garden.id, garden);
   };
 
   public shared ({ caller }) func deleteGarden(id : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete gardens");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete gardens");
     };
     gardens.remove(id);
   };
 
   // Job CRUD operations - Admin only for modifications, users can read
   public shared ({ caller }) func addJob(job : JobEntry) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can add jobs");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add jobs");
     };
     jobs.add(job.id, job);
   };
@@ -272,23 +272,23 @@ actor {
   };
 
   public shared ({ caller }) func updateJob(job : JobEntry) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update jobs");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update jobs");
     };
     jobs.add(job.id, job);
   };
 
   public shared ({ caller }) func deleteJob(id : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete jobs");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete jobs");
     };
     jobs.remove(id);
   };
 
   // MaintenanceSchedule CRUD operations - Admin only for modifications, users can read
   public shared ({ caller }) func addMaintenanceSchedule(schedule : MaintenanceSchedule) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can add maintenance schedules");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add maintenance schedules");
     };
     maintenanceSchedules.add(schedule.id, schedule);
   };
@@ -311,23 +311,23 @@ actor {
   };
 
   public shared ({ caller }) func updateMaintenanceSchedule(schedule : MaintenanceSchedule) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update maintenance schedules");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update maintenance schedules");
     };
     maintenanceSchedules.add(schedule.id, schedule);
   };
 
   public shared ({ caller }) func deleteMaintenanceSchedule(id : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete maintenance schedules");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete maintenance schedules");
     };
     maintenanceSchedules.remove(id);
   };
 
   // Quote CRUD operations - Admin only for modifications, users can read
   public shared ({ caller }) func addQuote(quote : Quote) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can add quotes");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add quotes");
     };
     quotes.add(quote.id, quote);
   };
@@ -350,23 +350,23 @@ actor {
   };
 
   public shared ({ caller }) func updateQuote(quote : Quote) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update quotes");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update quotes");
     };
     quotes.add(quote.id, quote);
   };
 
   public shared ({ caller }) func deleteQuote(id : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete quotes");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete quotes");
     };
     quotes.remove(id);
   };
 
   // Prospect CRUD operations - Admin only for modifications, users can read
   public shared ({ caller }) func addProspect(prospect : Prospect) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can add prospects");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add prospects");
     };
     prospects.add(prospect.id, prospect);
   };
@@ -389,23 +389,23 @@ actor {
   };
 
   public shared ({ caller }) func updateProspect(prospect : Prospect) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update prospects");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update prospects");
     };
     prospects.add(prospect.id, prospect);
   };
 
   public shared ({ caller }) func deleteProspect(id : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete prospects");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete prospects");
     };
     prospects.remove(id);
   };
 
   // Invoice CRUD operations - Admin only for modifications, users can read
   public shared ({ caller }) func addInvoice(invoice : Invoice) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can add invoices");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add invoices");
     };
     invoices.add(invoice.id, invoice);
   };
@@ -428,23 +428,23 @@ actor {
   };
 
   public shared ({ caller }) func updateInvoice(invoice : Invoice) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update invoices");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update invoices");
     };
     invoices.add(invoice.id, invoice);
   };
 
   public shared ({ caller }) func deleteInvoice(id : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete invoices");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete invoices");
     };
     invoices.remove(id);
   };
 
   // Transaction CRUD operations - Admin only for modifications, users can read
   public shared ({ caller }) func addTransaction(transaction : Transaction) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can add transactions");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add transactions");
     };
     transactions.add(transaction.id, transaction);
   };
@@ -467,23 +467,23 @@ actor {
   };
 
   public shared ({ caller }) func updateTransaction(transaction : Transaction) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update transactions");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update transactions");
     };
     transactions.add(transaction.id, transaction);
   };
 
   public shared ({ caller }) func deleteTransaction(id : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete transactions");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete transactions");
     };
     transactions.remove(id);
   };
 
   // Business operations - Admin only
   public shared ({ caller }) func convertProspectToClient(prospectId : Text, clientId : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can convert prospects to clients");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can convert prospects to clients");
     };
     switch (prospects.get(prospectId)) {
       case (null) { Runtime.trap("Prospect not found") };
