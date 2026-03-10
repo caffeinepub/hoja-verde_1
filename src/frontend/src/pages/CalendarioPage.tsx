@@ -1,6 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
 import { Calendar } from "../components/ui/calendar";
 import { Card, CardContent } from "../components/ui/card";
 import { useActor } from "../hooks/useActor";
@@ -8,7 +21,9 @@ import { labelJob, statusColorJob } from "../lib/appUtils";
 
 export default function CalendarioPage() {
   const { actor } = useActor();
+  const qc = useQueryClient();
   const [selected, setSelected] = useState<Date>(new Date());
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: jobs = [] } = useQuery({
     queryKey: ["jobs"],
@@ -22,12 +37,20 @@ export default function CalendarioPage() {
     enabled: !!actor,
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => actor!.deleteJob(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["jobs"] });
+      toast.success("Trabajo eliminado");
+    },
+    onError: () => toast.error("Error al eliminar el trabajo"),
+  });
+
   const selStr = selected.toISOString().split("T")[0];
   const dayJobs = jobs.filter((j) => j.scheduledDate === selStr);
   const clientName = (id: string) =>
     clients.find((c) => c.id === id)?.fullName ?? id;
 
-  // Days with jobs
   const daysWithJobs = new Set(jobs.map((j) => j.scheduledDate));
 
   return (
@@ -74,7 +97,7 @@ export default function CalendarioPage() {
                   <Badge className={`text-xs ${statusColorJob(j.status)}`}>
                     {labelJob(j.status)}
                   </Badge>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium text-sm">
                       {clientName(j.clientId)}
                     </p>
@@ -82,12 +105,51 @@ export default function CalendarioPage() {
                       {j.serviceDescription} &bull; {j.startTime}
                     </p>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:bg-red-50"
+                    onClick={() => setDeleteId(j.id)}
+                    data-ocid={`calendario.delete_button.${i + 1}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
+
+      <AlertDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+      >
+        <AlertDialogContent data-ocid="calendario.delete.dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar trabajo</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Seguro que deseas eliminar este trabajo? Esta acción no se puede
+              deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-ocid="calendario.delete.cancel_button">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteId) deleteMutation.mutate(deleteId);
+                setDeleteId(null);
+              }}
+              data-ocid="calendario.delete.confirm_button"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

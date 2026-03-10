@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "./components/Layout";
+import { Toaster } from "./components/ui/sonner";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
 import AjustesPage from "./pages/AjustesPage";
 import CalendarioPage from "./pages/CalendarioPage";
@@ -80,6 +81,7 @@ export default function App() {
   return (
     <Layout page={page} setPage={setPage}>
       {renderPage()}
+      <Toaster position="top-center" richColors />
     </Layout>
   );
 }

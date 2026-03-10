@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Edit, Plus, Trash2, UserCheck, UserPlus } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import type { Client, Prospect } from "../backend.d";
 import {
   AlertDialog,
@@ -78,12 +79,22 @@ export default function ProspectosPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["prospects"] });
       setSheetOpen(false);
+      toast.success("Prospecto guardado correctamente");
+    },
+    onError: () => {
+      toast.error("Error al guardar el prospecto. Intenta de nuevo.");
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => actor!.deleteProspect(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["prospects"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["prospects"] });
+      toast.success("Prospecto eliminado correctamente");
+    },
+    onError: () => {
+      toast.error("Error al eliminar el prospecto. Intenta de nuevo.");
+    },
   });
 
   const convertMutation = useMutation({
@@ -105,6 +116,10 @@ export default function ProspectosPage() {
       qc.invalidateQueries({ queryKey: ["prospects"] });
       qc.invalidateQueries({ queryKey: ["clients"] });
       setConvertId(null);
+      toast.success("Prospecto convertido a cliente correctamente");
+    },
+    onError: () => {
+      toast.error("Error al convertir el prospecto. Intenta de nuevo.");
     },
   });
 
@@ -118,6 +133,15 @@ export default function ProspectosPage() {
     status: "pending" as Prospect["status"],
   });
 
+  const handleSave = () => {
+    if (!editing) return;
+    if (!editing.name.trim()) {
+      toast.error("El nombre del prospecto es requerido.");
+      return;
+    }
+    saveMutation.mutate(editing);
+  };
+
   return (
     <div className="p-4 space-y-4" data-ocid="prospectos.page">
       <div className="flex justify-between items-center">
@@ -128,6 +152,7 @@ export default function ProspectosPage() {
             setEditing(emptyProspect());
             setSheetOpen(true);
           }}
+          disabled={!actor}
           data-ocid="prospectos.add.button"
         >
           <Plus className="h-5 w-5" />
@@ -212,7 +237,7 @@ export default function ProspectosPage() {
           {editing && (
             <div className="space-y-4">
               <div>
-                <Label>Nombre</Label>
+                <Label>Nombre *</Label>
                 <Input
                   className="mt-1"
                   value={editing.name}
@@ -290,8 +315,8 @@ export default function ProspectosPage() {
                 </Button>
                 <Button
                   className="flex-1 h-12"
-                  onClick={() => saveMutation.mutate(editing)}
-                  disabled={saveMutation.isPending}
+                  onClick={handleSave}
+                  disabled={saveMutation.isPending || !actor}
                   data-ocid="prospectos.form.save_button"
                 >
                   {saveMutation.isPending ? "Guardando..." : "Guardar"}

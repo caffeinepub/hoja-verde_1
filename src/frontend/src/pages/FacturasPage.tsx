@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Edit, MessageCircle, Plus, Receipt, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import type { Invoice } from "../backend.d";
 import {
   AlertDialog,
@@ -75,12 +76,22 @@ export default function FacturasPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["invoices"] });
       setSheetOpen(false);
+      toast.success("Factura guardada correctamente");
+    },
+    onError: () => {
+      toast.error("Error al guardar la factura. Intenta de nuevo.");
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => actor!.deleteInvoice(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["invoices"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Factura eliminada correctamente");
+    },
+    onError: () => {
+      toast.error("Error al eliminar la factura. Intenta de nuevo.");
+    },
   });
 
   const clientName = (id: string) =>
@@ -97,6 +108,19 @@ export default function FacturasPage() {
     nextMaintenanceDate: nowTimestamp(),
   });
 
+  const handleSave = () => {
+    if (!editing) return;
+    if (!editing.clientId) {
+      toast.error("Por favor selecciona un cliente.");
+      return;
+    }
+    if (editing.totalAmount <= 0) {
+      toast.error("El monto total debe ser mayor a cero.");
+      return;
+    }
+    saveMutation.mutate(editing);
+  };
+
   return (
     <div className="p-4 space-y-4" data-ocid="facturas.page">
       <div className="flex justify-between items-center">
@@ -107,6 +131,7 @@ export default function FacturasPage() {
             setEditing(emptyInvoice());
             setSheetOpen(true);
           }}
+          disabled={!actor}
           data-ocid="facturas.add.button"
         >
           <Plus className="h-5 w-5" />
@@ -196,7 +221,7 @@ export default function FacturasPage() {
           {editing && (
             <div className="space-y-4">
               <div>
-                <Label>Cliente</Label>
+                <Label>Cliente *</Label>
                 <Select
                   value={editing.clientId}
                   onValueChange={(v) => setEditing({ ...editing, clientId: v })}
@@ -231,7 +256,7 @@ export default function FacturasPage() {
                 />
               </div>
               <div>
-                <Label>Total (₡)</Label>
+                <Label>Total (₡) *</Label>
                 <Input
                   type="number"
                   className="mt-1"
@@ -256,8 +281,8 @@ export default function FacturasPage() {
                 </Button>
                 <Button
                   className="flex-1 h-12"
-                  onClick={() => saveMutation.mutate(editing)}
-                  disabled={saveMutation.isPending}
+                  onClick={handleSave}
+                  disabled={saveMutation.isPending || !actor}
                   data-ocid="facturas.form.save_button"
                 >
                   {saveMutation.isPending ? "Guardando..." : "Guardar"}

@@ -16,6 +16,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { toast } from "sonner";
 import type { Transaction } from "../backend.d";
 import {
   AlertDialog,
@@ -91,12 +92,18 @@ export default function FinanzasPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["transactions"] });
       setSheetOpen(false);
+      toast.success("Transacción guardada");
     },
+    onError: () => toast.error("Error al guardar la transacción"),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => actor!.deleteTransaction(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["transactions"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["transactions"] });
+      toast.success("Transacción eliminada");
+    },
+    onError: () => toast.error("Error al eliminar la transacción"),
   });
 
   if (isAdmin === false) {
@@ -125,7 +132,6 @@ export default function FinanzasPage() {
   const filtered =
     tab === "all" ? txs : txs.filter((t) => t.transactionType === tab);
 
-  // Monthly chart data (last 6 months)
   const now = new Date();
   const chartData = Array.from({ length: 6 }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
@@ -234,58 +240,67 @@ export default function FinanzasPage() {
       </div>
 
       <div className="space-y-2">
-        {filtered.map((t, i) => (
-          <Card key={t.id} data-ocid={`finanzas.item.${i + 1}`}>
-            <CardContent className="p-3 flex items-center gap-3">
-              <div
-                className={`p-2 rounded-lg ${t.transactionType === "income" ? "bg-green-50" : "bg-red-50"}`}
-              >
-                {t.transactionType === "income" ? (
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                ) : (
-                  <TrendingDown className="h-4 w-4 text-red-500" />
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">{t.description}</p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(
-                    Number(t.transactionDate) / 1_000_000,
-                  ).toLocaleDateString("es-CR")}
-                </p>
-              </div>
-              <div
-                className={`font-bold text-sm ${t.transactionType === "income" ? "text-green-700" : "text-red-600"}`}
-              >
-                {t.transactionType === "income" ? "+" : "-"}
-                {formatCurrency(t.amount)}
-              </div>
-              <div className="flex gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => {
-                    setEditing({ ...t });
-                    setSheetOpen(true);
-                  }}
-                  data-ocid={`finanzas.edit_button.${i + 1}`}
+        {filtered.length === 0 ? (
+          <p
+            className="text-muted-foreground text-sm text-center py-6"
+            data-ocid="finanzas.empty_state"
+          >
+            No hay transacciones
+          </p>
+        ) : (
+          filtered.map((t, i) => (
+            <Card key={t.id} data-ocid={`finanzas.item.${i + 1}`}>
+              <CardContent className="p-3 flex items-center gap-3">
+                <div
+                  className={`p-2 rounded-lg ${t.transactionType === "income" ? "bg-green-50" : "bg-red-50"}`}
                 >
-                  <Edit className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-destructive"
-                  onClick={() => setDeleteId(t.id)}
-                  data-ocid={`finanzas.delete_button.${i + 1}`}
+                  {t.transactionType === "income" ? (
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4 text-red-500" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{t.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(
+                      Number(t.transactionDate) / 1_000_000,
+                    ).toLocaleDateString("es-CR")}
+                  </p>
+                </div>
+                <div
+                  className={`font-bold text-sm ${t.transactionType === "income" ? "text-green-700" : "text-red-600"}`}
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                  {t.transactionType === "income" ? "+" : "-"}
+                  {formatCurrency(t.amount)}
+                </div>
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => {
+                      setEditing({ ...t });
+                      setSheetOpen(true);
+                    }}
+                    data-ocid={`finanzas.edit_button.${i + 1}`}
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-destructive"
+                    onClick={() => setDeleteId(t.id)}
+                    data-ocid={`finanzas.delete_button.${i + 1}`}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
@@ -377,7 +392,7 @@ export default function FinanzasPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar transacción</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Seguro que deseas eliminar?
+              ¿Seguro que deseas eliminar esta transacción?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

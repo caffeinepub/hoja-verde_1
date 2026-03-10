@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Edit, FileText, MessageCircle, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import type { Quote } from "../backend.d";
 import {
   AlertDialog,
@@ -88,12 +89,22 @@ export default function CotizacionesPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["quotes"] });
       setSheetOpen(false);
+      toast.success("Cotización guardada correctamente");
+    },
+    onError: () => {
+      toast.error("Error al guardar la cotización. Intenta de nuevo.");
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => actor!.deleteQuote(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["quotes"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["quotes"] });
+      toast.success("Cotización eliminada correctamente");
+    },
+    onError: () => {
+      toast.error("Error al eliminar la cotización. Intenta de nuevo.");
+    },
   });
 
   const clientName = (id: string) =>
@@ -111,6 +122,19 @@ export default function CotizacionesPage() {
     status: "pending" as Quote["status"],
   });
 
+  const handleSave = () => {
+    if (!editing) return;
+    if (!editing.clientId) {
+      toast.error("Por favor selecciona un cliente.");
+      return;
+    }
+    if (editing.price < 0) {
+      toast.error("El precio no puede ser negativo.");
+      return;
+    }
+    saveMutation.mutate(editing);
+  };
+
   return (
     <div className="p-4 space-y-4" data-ocid="cotizaciones.page">
       <div className="flex justify-between items-center">
@@ -121,6 +145,7 @@ export default function CotizacionesPage() {
             setEditing(emptyQuote());
             setSheetOpen(true);
           }}
+          disabled={!actor}
           data-ocid="cotizaciones.add.button"
         >
           <Plus className="h-5 w-5" />
@@ -211,7 +236,7 @@ export default function CotizacionesPage() {
           {editing && (
             <div className="space-y-4">
               <div>
-                <Label>Cliente</Label>
+                <Label>Cliente *</Label>
                 <Select
                   value={editing.clientId}
                   onValueChange={(v) => setEditing({ ...editing, clientId: v })}
@@ -293,8 +318,8 @@ export default function CotizacionesPage() {
                 </Button>
                 <Button
                   className="flex-1 h-12"
-                  onClick={() => saveMutation.mutate(editing)}
-                  disabled={saveMutation.isPending}
+                  onClick={handleSave}
+                  disabled={saveMutation.isPending || !actor}
                   data-ocid="cotizaciones.form.save_button"
                 >
                   {saveMutation.isPending ? "Guardando..." : "Guardar"}

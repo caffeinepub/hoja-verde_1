@@ -10,6 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import type { Client } from "../backend.d";
 import {
   AlertDialog,
@@ -76,12 +77,22 @@ export default function ClientesPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["clients"] });
       setSheetOpen(false);
+      toast.success("Cliente guardado correctamente");
+    },
+    onError: () => {
+      toast.error("Error al guardar el cliente. Intenta de nuevo.");
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => actor!.deleteClient(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["clients"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["clients"] });
+      toast.success("Cliente eliminado correctamente");
+    },
+    onError: () => {
+      toast.error("Error al eliminar el cliente. Intenta de nuevo.");
+    },
   });
 
   const filtered = clients.filter(
@@ -97,6 +108,15 @@ export default function ClientesPage() {
   const openEdit = (c: Client) => {
     setEditing({ ...c });
     setSheetOpen(true);
+  };
+
+  const handleSave = () => {
+    if (!editing) return;
+    if (!editing.fullName.trim()) {
+      toast.error("El nombre completo es requerido.");
+      return;
+    }
+    saveMutation.mutate(editing);
   };
 
   return (
@@ -115,6 +135,7 @@ export default function ClientesPage() {
         <Button
           className="h-10 w-10 p-0 rounded-xl"
           onClick={openAdd}
+          disabled={!actor}
           data-ocid="clientes.add.button"
         >
           <Plus className="h-5 w-5" />
@@ -248,9 +269,10 @@ export default function ClientesPage() {
             <ClientForm
               client={editing}
               onChange={setEditing}
-              onSave={() => saveMutation.mutate(editing)}
+              onSave={handleSave}
               onCancel={() => setSheetOpen(false)}
               saving={saveMutation.isPending}
+              actorReady={!!actor}
             />
           )}
         </SheetContent>
@@ -295,19 +317,21 @@ function ClientForm({
   onSave,
   onCancel,
   saving,
+  actorReady,
 }: {
   client: Client;
   onChange: (c: Client) => void;
   onSave: () => void;
   onCancel: () => void;
   saving: boolean;
+  actorReady: boolean;
 }) {
   const f = (field: keyof Client, value: string | boolean) =>
     onChange({ ...client, [field]: value });
   return (
     <div className="space-y-4">
       <div>
-        <Label>Nombre completo</Label>
+        <Label>Nombre completo *</Label>
         <Input
           className="mt-1"
           value={client.fullName}
@@ -374,7 +398,7 @@ function ClientForm({
         <Button
           className="flex-1 h-12"
           onClick={onSave}
-          disabled={saving}
+          disabled={saving || !actorReady}
           data-ocid="clientes.form.save_button"
         >
           {saving ? "Guardando..." : "Guardar"}
